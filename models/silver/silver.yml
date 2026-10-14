@@ -1,0 +1,72 @@
+version: 2
+
+# Silver layer: cleaned, typed, consistently named models.
+# Naming: snake_case; keys end in _id / _code; booleans start with is_ / has_;
+# dates end in _date or are called month_start; models are prefixed s_.
+
+models:
+  - name: s_listings_monthly
+    description: Cleaned Airbnb listings, one row per listing per month.
+    columns:
+      - name: listing_id
+        data_tests: [not_null]
+      - name: host_id
+        data_tests: [not_null]
+      - name: month_start
+        description: First day of the month of the source file. The reporting period of the row.
+        data_tests: [not_null]
+      - name: scraped_date
+        description: Scrape date, NULL when the source value falls outside the file's month.
+      - name: has_availability
+        data_tests: [not_null]
+      - name: price
+        data_tests: [not_null]
+      - name: availability_30
+        data_tests: [not_null]
+
+  - name: s_host
+    description: Host entity, latest state per host. Input of host_snapshot.
+    columns:
+      - name: host_id
+        data_tests: [not_null, unique]
+      - name: updated_at
+        description: Month in which the host's attributes last changed. Snapshot timestamp.
+        data_tests: [not_null]
+
+  - name: s_listing
+    description: Listing entity, latest state per listing. Input of listing_snapshot.
+    columns:
+      - name: listing_id
+        data_tests: [not_null, unique]
+      - name: updated_at
+        description: Month in which the listing's attributes last changed. Snapshot timestamp.
+        data_tests: [not_null]
+
+  - name: s_lga
+    description: NSW Local Government Areas. Input of lga_snapshot.
+    columns:
+      - name: lga_code
+        data_tests: [not_null, unique]
+      - name: lga_name
+        data_tests: [not_null, unique]
+
+  - name: s_suburb
+    description: NSW suburbs with their LGA. Input of suburb_snapshot.
+    columns:
+      - name: suburb_id
+        data_tests: [not_null, unique]
+      - name: suburb_key
+        description: Upper-case suburb name, used to match Airbnb host_neighbourhood.
+        data_tests: [not_null, unique]
+
+  - name: s_census_g01
+    description: Census 2016 G01 (selected person characteristics by sex) per LGA.
+    columns:
+      - name: lga_code
+        data_tests: [not_null, unique]
+
+  - name: s_census_g02
+    description: Census 2016 G02 (selected medians and averages) per LGA.
+    columns:
+      - name: lga_code
+        data_tests: [not_null, unique]

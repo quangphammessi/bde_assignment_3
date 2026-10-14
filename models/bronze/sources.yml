@@ -1,0 +1,41 @@
+version: 2
+
+# Bronze layer: raw tables created by part_1.sql and loaded by the Airflow DAG
+# bde_a3_bronze_load. dbt only reads them.
+sources:
+  - name: bronze
+    schema: bronze
+    description: Raw copies of the source CSV files, loaded by Airflow.
+    tables:
+      - name: raw_listings
+        description: >
+          Airbnb listings for Sydney, one row per listing per monthly file
+          (05_2020.csv to 04_2021.csv), appended month by month. All source
+          columns are text. source_file identifies the month.
+        columns:
+          - name: listing_id
+            data_tests: [not_null]
+          - name: host_id
+            data_tests: [not_null]
+          - name: source_file
+            data_tests: [not_null]
+      - name: raw_census_g01
+        description: 2016 Census G01, selected person characteristics by sex, one row per NSW LGA.
+        columns:
+          - name: lga_code_2016
+            data_tests: [not_null, unique]
+      - name: raw_census_g02
+        description: 2016 Census G02, selected medians and averages, one row per NSW LGA.
+        columns:
+          - name: lga_code_2016
+            data_tests: [not_null, unique]
+      - name: raw_lga_code
+        description: NSW LGA code to LGA name.
+        columns:
+          - name: lga_code
+            data_tests: [not_null, unique]
+      - name: raw_lga_suburb
+        description: NSW suburb name to LGA name (upper case).
+        columns:
+          - name: suburb_name
+            data_tests: [not_null, unique]

@@ -1,0 +1,46 @@
+# =============================================================================
+# Big Data Engineering - Assignment 3
+# dbt project: Sydney Airbnb + Census warehouse on Postgres
+#
+# Layers (Medallion architecture)
+#   bronze  raw tables loaded by Airflow (declared as sources, not built here)
+#   silver  cleaned models + dbt snapshots (history of each dimension entity)
+#   gold    star schema (dim_*, fact_*, ref_census_*) and datamart views (dm_*)
+#
+# Job command, run after every monthly load:   dbt build
+# (dbt build runs models, snapshots and tests in dependency order:
+#  silver models -> snapshots -> dimensions -> fact -> datamart views.)
+# =============================================================================
+
+name: 'bde_assignment_3'
+version: '1.0.0'
+config-version: 2
+
+# Only used by dbt Core on a laptop; dbt Cloud takes the connection from the
+# project settings.
+profile: 'default'
+
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Schema names are used exactly as written here (silver, gold) thanks to
+# macros/generate_schema_name.sql. Without that macro dbt would prefix them
+# with the target schema (for example dbt_luke_silver).
+models:
+  bde_assignment_3:
+    silver:
+      +schema: silver
+      +materialized: table
+    gold:
+      +schema: gold
+      star:
+        +materialized: table    # dimensions, fact and census reference tables
+      mart:
+        +materialized: view     # the brief asks for views
